@@ -2,7 +2,7 @@ var MIDIHackery = {
 	// Callback functions to trigger as soon as LibTimidity finishes loading
 	_onLoad: [],
 
-	init: function(libPath) {
+	loadLibrary: function(libPath) {
 		if (MIDIHackery._initFlag)
 			return; // we are already initialising (or initialised)
 		MIDIHackery._initFlag = true;
@@ -185,6 +185,8 @@ MIDIHackery.Song.prototype = {
 	// Request a function to be called when an event occurs
 	// 'ready': Song and the necessary patch files have been loaded
 	// 'error': An error has occurred
+	// 'ended': The song has finished (when playback started through
+	//          createAudioNode)
 	on: function(name, callback) {
 		this._eventHandlers[name].push(callback);
 	},
@@ -311,10 +313,9 @@ MIDIHackery.Song.prototype = {
 		var sampleCount = byteCount / this._bytesPerSample;
 
 		// Was anything output?
+		// If not, don't bother copying anything
 		if (sampleCount === 0) {
-			this._emitEvent('ended');
-			this.cleanup();
-			return sampleCount;
+			return 0;
 		}
 
 		switch (this._format) {
@@ -346,17 +347,21 @@ MIDIHackery.Song.prototype = {
 			m._mid_song_free(this._songPtr);
 			this._songPtr = 0;
 		}
+
+		// TODO: Maybe this should cancel a pending XHR too?
 	},
 
 	// Create a WebAudio node.
 	// Note: This function expects the format to be set to 's16',
 	// and the sample rate used when creating the song to be set to the
 	// AudioContext's sample rate!
-	createAudioNode: function(audioContext) {
+	createAudioNode: function(audioContext, autoCleanup) {
 		if (this._format !== 's16')
 			return null;
 		if (this._rate !== audioContext.sampleRate)
 			return null;
+		if (autoCleanup === undefined)
+			autoCleanup = true;
 
 		var node = audioContext.createScriptProcessor(this._bufferSize, 0, this._channels);
 		var array = new Int16Array(this._bufferSize * this._channels);
@@ -385,10 +390,15 @@ MIDIHackery.Song.prototype = {
 					output1[i] = 0;
 				}
 			}
+
+			if (sampleCount == 0) {
+				self._emitEvent('ended');
+				if (autoCleanup) {
+					node.disconnect();
+					self.cleanup();
+				}
+			}
 		};
-		this.on('ended', function() {
-			node.disconnect();
-		});
 		return node;
 	}
 };

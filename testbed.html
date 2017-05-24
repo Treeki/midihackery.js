@@ -8,7 +8,9 @@
 	var audioCtx;
 
 	document.addEventListener('DOMContentLoaded', function() {
-		audioCtx = new AudioContext();
+		// required for Safari :<
+		var cls = window.AudioContext || window.webkitAudioContext;
+		audioCtx = new cls();
 
 		MIDIHackery.onLoad(function() {
 			mp = new MIDIHackery.Player('/');
@@ -20,7 +22,7 @@
 				})
 			});
 		});
-		MIDIHackery.init();
+		MIDIHackery.loadLibrary();
 	});
 	</script>
 </head>
