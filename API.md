@@ -11,7 +11,7 @@ Alternatively, if you don't mind the weight of ~210kb of JavaScript on your
 page, you can skip these steps and just reference `libtimidity.js` directly
 using a `<script>` tag.
 
-# The MIDIHackery.Player object
+## The `MIDIHackery.Player` object
 
 `MIDIHackery.Player` wraps an instance of the libTiMidity player and its patch
 set. You'll probably only want to have one of these.
@@ -49,7 +49,7 @@ to a MIDI file). A `MIDIHackery.Song` object will be returned.
 - **bufferSize**: amount of samples to render with each call into libtimidity.
   Defaults to 8192.
 
-# The MIDIHackery.Song object
+## The `MIDIHackery.Song` object
 
 `MIDIHackery.Song` wraps a single playing song, and is tied to a `Player`
 instance. It is created by calling the `loadSongFromBuffer` or
@@ -70,7 +70,7 @@ To get the current position in the song (in seconds), call `song.getTime()`.
 
 To get the duration of the song (in seconds), call `song.getTotalTime()`.
 
-## Rendering to a WebAudio node
+### Rendering to a WebAudio node
 
 Call `song.createAudioNode(audioContext, autoCleanup)`, where `audioContext`
 is an `AudioContext` object. This will return a node which can be connected to
@@ -88,7 +88,7 @@ automatically as soon as playback reaches the end of the MIDI.
 In either case, an event will be raised which you can handle by calling:
 `song.on('ended', function() { ... });`
 
-## Rendering to a sample buffer
+### Rendering to a sample buffer
 
 Call `song.render(outputArray)`. outputArray should be a typed array view with
 a format matching that provided when creating the Song (`Uint8Array` for 'u8',
