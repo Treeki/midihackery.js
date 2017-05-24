@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src='midihackery.js'></script>
+	<script>
+	var mp = null;
+	var song = null;
+	var audioCtx;
+
+	document.addEventListener('DOMContentLoaded', function() {
+		audioCtx = new AudioContext();
+
+		MIDIHackery.onLoad(function() {
+			mp = new MIDIHackery.Player('/');
+			mp.on('ready', function() {
+				song = mp.loadSongFromURL('SMG_GoodEgg.mid', {sampleRate: audioCtx.sampleRate});
+				song.on('ready', function() {
+					song.start();
+					song.createAudioNode(audioCtx).connect(audioCtx.destination);
+				})
+			});
+		});
+		MIDIHackery.init();
+	});
+	</script>
+</head>
+<body>
+
+</body>
+</html>
